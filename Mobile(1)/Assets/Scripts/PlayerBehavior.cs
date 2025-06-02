@@ -62,6 +62,19 @@ public class PlayerBehavior : MonoBehaviour
 
     private void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            var pauseBehavior = GameObject.FindObjectOfType<PauseScreenBehavior>();
+
+            pauseBehavior.SetPauseMenu(!PauseScreenBehavior.paused);
+        }
+        
+        if (PauseScreenBehavior.paused)
+        {
+            return;
+        }
+
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
 
         if (Input.GetMouseButton(0))
@@ -104,6 +117,12 @@ public class PlayerBehavior : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
+
+        if (PauseScreenBehavior.paused)
+        {
+            return;
+        }
+        
         var horizontalSpeed = Input.GetAxis("Horizontal") * dodgeSpeed;
 
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
