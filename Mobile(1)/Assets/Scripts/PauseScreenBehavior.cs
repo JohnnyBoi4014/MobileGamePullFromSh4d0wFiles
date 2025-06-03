@@ -22,6 +22,8 @@ public class PauseScreenBehavior : MonoBehaviour
     /// </summary>
     /// <param name="isPaused"></param>
     /// 
+
+    public GameObject onScreenControls;
     public void SetPauseMenu(bool isPaused)
     {
         paused = isPaused;
@@ -29,6 +31,8 @@ public class PauseScreenBehavior : MonoBehaviour
         Time.timeScale = (paused) ? 0 : 1;
 
         pauseMenu.SetActive(paused);
+
+        onScreenControls.SetActive(!paused);
     }
     
     // Start is called before the first frame update
@@ -37,7 +41,7 @@ public class PauseScreenBehavior : MonoBehaviour
         paused = false;
 
         // My added fix to a problem
-        SetPauseMenu(paused);
+        SetPauseMenu(false);
     }
 
     // Update is called once per frame

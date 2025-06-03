@@ -51,6 +51,9 @@ public class PlayerBehavior : MonoBehaviour
     private float minSwipeDistancePixels;
 
     private Vector2 touchStart;
+
+
+    private MobileJoystick joystick;
     
     // Start is called before the first frame update
     void Start()
@@ -58,6 +61,8 @@ public class PlayerBehavior : MonoBehaviour
         rb = GetComponent<Rigidbody>();
 
         minSwipeDistancePixels = minSwipeDistance * Screen.dpi;
+
+        joystick = GameObject.FindObjectOfType<MobileJoystick>();
     }
 
     private void Update()
@@ -125,12 +130,21 @@ public class PlayerBehavior : MonoBehaviour
         
         var horizontalSpeed = Input.GetAxis("Horizontal") * dodgeSpeed;
 
+        //Chapter 5
+        if (joystick && joystick.axisValue.x != 0)
+        {
+            horizontalSpeed = joystick.axisValue.x * dodgeSpeed;
+        }
+
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
 
         if (Input.GetMouseButton(0))
         {
-            var screenPos = Input.mousePosition;
-            horizontalSpeed = CalculateMovement(screenPos);
+            if (!joystick)
+            {
+                var screenPos = Input.mousePosition;
+                horizontalSpeed = CalculateMovement(screenPos);
+            }
         }
 
         if (horizMovement == MobileHorizMovement.Accelerometer)
@@ -163,7 +177,7 @@ public class PlayerBehavior : MonoBehaviour
             horizontalSpeed = Input.acceleration.x * dodgeSpeed;
         }
         
-        if (Input.touchCount > 0)
+        if (!joystick && Input.touchCount > 0)
         {
 
             if (horizMovement == MobileHorizMovement.ScreenTouch)
