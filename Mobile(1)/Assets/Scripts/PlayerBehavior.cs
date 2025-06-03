@@ -51,6 +51,9 @@ public class PlayerBehavior : MonoBehaviour
     private float minSwipeDistancePixels;
 
     private Vector2 touchStart;
+
+
+    private MobileJoystick joystick;
     
     // Start is called before the first frame update
     void Start()
@@ -58,16 +61,39 @@ public class PlayerBehavior : MonoBehaviour
         rb = GetComponent<Rigidbody>();
 
         minSwipeDistancePixels = minSwipeDistance * Screen.dpi;
+
+        joystick = GameObject.FindObjectOfType<MobileJoystick>();
     }
 
     private void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            var pauseBehavior = GameObject.FindObjectOfType<PauseScreenBehavior>();
+
+            pauseBehavior.SetPauseMenu(!PauseScreenBehavior.paused);
+        }
+        
+        if (PauseScreenBehavior.paused)
+        {
+            return;
+        }
+
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
 
         if (Input.GetMouseButton(0))
         {
             Vector2 screenPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-            TouchObjects(screenPos);
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.touches[0];
+                TouchObjects(screenPos, touch);
+            }
+            else
+            {
+                TouchObjects(screenPos);
+            }
         }
         if (Input.touchCount > 0)
         {
@@ -96,14 +122,29 @@ public class PlayerBehavior : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
+
+        if (PauseScreenBehavior.paused)
+        {
+            return;
+        }
+        
         var horizontalSpeed = Input.GetAxis("Horizontal") * dodgeSpeed;
+
+        //Chapter 5
+        if (joystick && joystick.axisValue.x != 0)
+        {
+            horizontalSpeed = joystick.axisValue.x * dodgeSpeed;
+        }
 
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
 
         if (Input.GetMouseButton(0))
         {
-            var screenPos = Input.mousePosition;
-            horizontalSpeed = CalculateMovement(screenPos);
+            if (!joystick)
+            {
+                var screenPos = Input.mousePosition;
+                horizontalSpeed = CalculateMovement(screenPos);
+            }
         }
 
         if (horizMovement == MobileHorizMovement.Accelerometer)
@@ -136,7 +177,7 @@ public class PlayerBehavior : MonoBehaviour
             horizontalSpeed = Input.acceleration.x * dodgeSpeed;
         }
         
-        if (Input.touchCount > 0)
+        if (!joystick && Input.touchCount > 0)
         {
 
             if (horizMovement == MobileHorizMovement.ScreenTouch)
@@ -188,11 +229,11 @@ public class PlayerBehavior : MonoBehaviour
         if (touch.phase == TouchPhase.Began)
         {
             touchStart = touch.position;
-            test++;
+            //test++;
         }
         else if (touch.phase == TouchPhase.Ended)
         {
-            test = 4;
+            //test = 4;
             Vector2 touchEnd = touch.position;
 
             float x = touchEnd.x - touchStart.x;
@@ -276,14 +317,59 @@ public class PlayerBehavior : MonoBehaviour
 
         if (Physics.Raycast(touchRay, out hit, Mathf.Infinity, layerMask, QueryTriggerInteraction.Ignore))
         {
-            hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+            if (Input.touchCount == 0)
+            {
+                hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+            }
+
+            //hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
         }
     }
+
+    //Newly added test
+    private static void TouchObjects(Vector2 screenPos, Touch touch)
+    {
+        Ray touchRay = Camera.main.ScreenPointToRay(screenPos);
+        RaycastHit hit;
+
+        int layerMask = ~0;
+
+        if (Physics.Raycast(touchRay, out hit, Mathf.Infinity, layerMask, QueryTriggerInteraction.Ignore))
+        {
+            if (touch.phase == TouchPhase.Began)
+            {
+                hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+            }
+
+            //hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+        }
+    }
+
+
 
     /// <param name="touch">our touch event</param>
     private static void TouchObjects(Touch touch)
     {
-        Ray touchRay = Camera.main.ScreenPointToRay(touch.position);
+
+        if (Input.touchCount == 1)
+        {
+            Ray touchRay = Camera.main.ScreenPointToRay(touch.position);
+            RaycastHit hit;
+
+            int layerMask = ~0;
+
+            if (Physics.Raycast(touchRay, out hit, Mathf.Infinity, layerMask, QueryTriggerInteraction.Ignore))
+            {
+                if (touch.phase == TouchPhase.Began)
+                {
+                    hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+                }
+
+                hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
+            }
+        }
+        
+        /*Ray touchRay = Camera.main.ScreenPointToRay(touch.position);
         RaycastHit hit;
 
         int layerMask = ~0;
@@ -291,6 +377,6 @@ public class PlayerBehavior : MonoBehaviour
         if (Physics.Raycast(touchRay, out hit, Mathf.Infinity, layerMask, QueryTriggerInteraction.Ignore))
         {
             hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
-        }
+        }*/
     }
 }

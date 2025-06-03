@@ -118,6 +118,10 @@ public class GameManager : MonoBehaviour
             */
 
             //-------------------------------------------------------------------------------------
+
+
+            //Note: Window -> Rendering -> Lighting -> Environment
+            //that's how to change skybox
         }
     }
 }
