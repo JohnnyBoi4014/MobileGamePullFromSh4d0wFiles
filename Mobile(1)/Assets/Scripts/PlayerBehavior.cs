@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -63,6 +64,8 @@ public class PlayerBehavior : MonoBehaviour
         minSwipeDistancePixels = minSwipeDistance * Screen.dpi;
 
         joystick = GameObject.FindObjectOfType<MobileJoystick>();
+
+        Score = 0;
     }
 
     private void Update()
@@ -127,6 +130,8 @@ public class PlayerBehavior : MonoBehaviour
         {
             return;
         }
+
+        Score += Time.deltaTime;
         
         var horizontalSpeed = Input.GetAxis("Horizontal") * dodgeSpeed;
 
@@ -378,5 +383,42 @@ public class PlayerBehavior : MonoBehaviour
         {
             hit.transform.SendMessage("PlayerTouch", SendMessageOptions.DontRequireReceiver);
         }*/
+    }
+
+    [Header("Object References")]
+    public TextMeshProUGUI scoreText;
+    
+    private float score = 0;
+    public float Score
+    {
+        get
+        {
+            return score;
+        }
+        set
+        {
+            score = value;
+
+            if (scoreText == null)
+            {
+                Debug.LogError("Score Text is not set. " + "Please go to the Inspector and assign it");
+
+                return;
+            }
+
+            
+            //new code
+            int cleanScore = (int)score;
+
+            scoreText.text = cleanScore.ToString();
+
+            if (cleanScore > PlayerPrefs.GetInt("score"))
+            {
+                PlayerPrefs.SetInt("score", cleanScore);
+            }
+
+            // old code
+            //scoreText.text = string.Format("{0:0}", score);
+        }
     }
 }
