@@ -48,4 +48,37 @@ public class MainMenuBehavior : MonoBehaviour
     {
         highScoreText.text = "High Score: " + PlayerPrefs.GetInt("score").ToString();
     }
+
+    public void SlideMenuIn(GameObject obj)
+    {
+        obj.SetActive(true);
+
+        var rt = obj.GetComponent<RectTransform>();
+
+        if (rt)
+        {
+            var pos = rt.position;
+            pos.x = -Screen.width/2;
+            rt.position = pos;
+
+            var tween = LeanTween.moveX(rt, 0, 1.5f);
+            tween.setEase(LeanTweenType.easeInOutExpo);
+            tween.setIgnoreTimeScale(true);
+        }
+    }
+    public void SlideMenuOut(GameObject obj)
+    {
+        obj.SetActive(true);
+
+        var rt = obj.GetComponent<RectTransform>();
+
+        if (rt)
+        {
+            var tween = LeanTween.moveX(rt, Screen.width/2, 0.5f);
+            tween.setEase(LeanTweenType.easeOutQuad);
+            tween.setIgnoreTimeScale(true);
+
+            tween.setOnComplete(() => { obj.SetActive(false); });
+        }
+    }
 }

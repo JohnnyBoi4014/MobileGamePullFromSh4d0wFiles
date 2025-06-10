@@ -24,15 +24,28 @@ public class PauseScreenBehavior : MonoBehaviour
     /// 
 
     public GameObject onScreenControls;
+
+    //experiment
+    public MainMenuBehavior mmb;
     public void SetPauseMenu(bool isPaused)
     {
         paused = isPaused;
 
         Time.timeScale = (paused) ? 0 : 1;
 
-        pauseMenu.SetActive(paused);
+        // old stuff
+        //pauseMenu.SetActive(paused);
 
-        onScreenControls.SetActive(!paused);
+        if (paused)
+        {
+            mmb.SlideMenuIn(pauseMenu);
+        }
+        else
+        {
+            mmb.SlideMenuOut(pauseMenu);
+        }
+
+            onScreenControls.SetActive(!paused);
     }
     
     // Start is called before the first frame update
